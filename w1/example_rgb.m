@@ -8,29 +8,28 @@ close all
 imagepath = './train';
 maskpath = './mask';
 Samples = [];
-SamplesImage = [];
+SamplesRGB = [];
+
 for k=1:15
     % Load image
     I = imread(sprintf('%s/%03d.png',imagepath,k));
+    HSV = rgb2hsv(I);
     
     % You may consider other color space than RGB
     R = I(:,:,1);
     G = I(:,:,2);
     B = I(:,:,3);
-    SamplesImage = [SamplesImage; [R G B]];
+        
+    H = HSV(:,:,1);
+    S = HSV(:,:,2);
+    V = HSV(:,:,3);
     
-    % % Collect samples 
-    % disp('');
-    % disp('INTRUCTION: Click along the boundary of the ball. Double-click when you get back to the initial point.')
-    % disp('INTRUCTION: You can maximize the window size of the figure for precise clicks.')
-    % figure(1), 
-    % % mask = roipoly(I); 
     maskI = imread(sprintf('%s/%03d.png',maskpath,k)) > 0;
     mask = maskI(:,:,1); % only one component
     sample_ind = find(mask);
 
-    % figure(2), imshow(I .* maskI); title('Segment');
-    % pause
+    figure(2), imshow(I .* maskI); title('Segment');
+    pause
 
     sample_ind = find(mask > 0);
     % disp('sample_ind: ' + sample_ind)
@@ -38,19 +37,34 @@ for k=1:15
     R = R(sample_ind);
     G = G(sample_ind);
     B = B(sample_ind);
+
+    H = H(sample_ind);
+    S = S(sample_ind);
+    V = V(sample_ind);
     
-    Samples = [Samples; [R G B]];
-    
+    SamplesRGB = [SamplesRGB; [R G B]];
+    Samples = [Samples; [H S V]];
+
 end
 
-colors = double(Samples) ./ 256;
+format long
+
+H = Samples(:,1);
+N = size(H)(1);
+MU = sum(H) / N
+sigma2 = sum((H .- MU).^2) / N
+
+% to compute the probability:
+% (exp ( - (((x - MU) ^ 2) / (2 * sigma2)) )) / (sqrt(2 * pi * sigma2));
+
+colors = double(SamplesRGB) ./ 256;
 % visualize the sample distribution
 figure, 
 scatter3(Samples(:,1),Samples(:,2),Samples(:,3),30, colors)
 title('Pixel Color Distribubtion');
-xlabel('Red');
-ylabel('Green');
-zlabel('Blue');
+xlabel('Hue');
+ylabel('Saturation');
+zlabel('Value');
 pause
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -59,4 +73,3 @@ pause
 % Now choose you model type and estimate the parameters (mu and Sigma) from
 % the sample data.
 %
-
