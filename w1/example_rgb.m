@@ -5,10 +5,10 @@
 pkg load image
 close all
 
-masks001 = [ 65, 58 ; 53, 64; 61, 70; 62, 76; 59, 83; 68, 83; 75, 77; 77, 70; 75, 62; 69, 58; 65, 58]
-
 imagepath = './train';
+maskpath = './mask';
 Samples = [];
+SamplesImage = [];
 for k=1:15
     % Load image
     I = imread(sprintf('%s/%03d.png',imagepath,k));
@@ -17,17 +17,23 @@ for k=1:15
     R = I(:,:,1);
     G = I(:,:,2);
     B = I(:,:,3);
+    SamplesImage = [SamplesImage; [R G B]];
     
-    % Collect samples 
-    disp('');
-    disp('INTRUCTION: Click along the boundary of the ball. Double-click when you get back to the initial point.')
-    disp('INTRUCTION: You can maximize the window size of the figure for precise clicks.')
-    figure(1), 
-    % mask = roipoly(I); 
-    mask = poly2mask(masks001(:, 1), masks001(:, 2), 160, 120)
-    scatter(masks001(:, 1), masks001(:, 2))
-    figure(2), imshow(mask); title('Mask');
+    % % Collect samples 
+    % disp('');
+    % disp('INTRUCTION: Click along the boundary of the ball. Double-click when you get back to the initial point.')
+    % disp('INTRUCTION: You can maximize the window size of the figure for precise clicks.')
+    % figure(1), 
+    % % mask = roipoly(I); 
+    maskI = imread(sprintf('%s/%03d.png',maskpath,k)) > 0;
+    mask = maskI(:,:,1); % only one component
+    sample_ind = find(mask);
+
+    % figure(2), imshow(I .* maskI); title('Segment');
+    % pause
+
     sample_ind = find(mask > 0);
+    % disp('sample_ind: ' + sample_ind)
     
     R = R(sample_ind);
     G = G(sample_ind);
@@ -35,17 +41,17 @@ for k=1:15
     
     Samples = [Samples; [R G B]];
     
-    disp('INTRUCTION: Press any key to continue. (Ctrl+c to exit)')
-    pause
 end
 
+colors = double(Samples) ./ 256;
 % visualize the sample distribution
 figure, 
-scatter3(Samples(:,1),Samples(:,2),Samples(:,3),'.');
+scatter3(Samples(:,1),Samples(:,2),Samples(:,3),30, colors)
 title('Pixel Color Distribubtion');
 xlabel('Red');
 ylabel('Green');
 zlabel('Blue');
+pause
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % [IMPORTANT]
