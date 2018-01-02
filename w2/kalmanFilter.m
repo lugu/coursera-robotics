@@ -15,6 +15,17 @@ function [ predictx, predicty, state, param ] = kalmanFilter( t, x, y, state, pa
         return;
     end
 
+    % dt = 330ms ?
+    % transition matrix A = [ 1, dt ; 0, 1 ]
+    A = [ 1, 0.033 ; 0 , 1 ];
+
+    % sigma = diag ( [ σpx2 , σpy2 , σvx2 , σvy2 ] );
+
+    % C observation matrix: z = C * x
+    C = [ 1, 0, 0, 0 ; 0, 1, 0, 0 ];
+
+    % sigmaMeasurement = diag ( [ σzx2 , σzy2 ] );
+
     %% TODO: Add Kalman filter updates
     % As an example, here is a Naive estimate without a Kalman filter
     % You should replace this code

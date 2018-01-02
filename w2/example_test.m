@@ -17,6 +17,7 @@ load training5.mat
 % [3] rgb is a cell array of images containing the image of the scene at
 %     the time of image recording. Only used to help you visualize the
 %     scene; not used in the function
+pkg load image
 
 %% Plot the path of the ball
 figure(1);
@@ -34,6 +35,8 @@ axis equal;
 title('Ball Position tracks');
 xlabel('X (meters)');
 ylabel('Y (meters)');
+
+pause
 
 %% Run algorithm
 % Call your mapping function here.
