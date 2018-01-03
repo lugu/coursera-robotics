@@ -99,6 +99,7 @@ plot(predictions(1, :), predictions(2, :), 'mo-');
 hold off;
 legend('Observed','End','Start','Your Prediction','Kalman Prediction');
 
+pause
 % figure(20);
 % clf;hold on;
 % plot(ball(1, 1+nSkip:end));plot(predictions(1, 1:end-nSkip));

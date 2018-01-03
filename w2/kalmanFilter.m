@@ -7,53 +7,47 @@ function [ predictx, predicty, state, param ] = kalmanFilter( t, x, y, state, pa
     % R = eye(2)
 
     % Check if the first time running this function
-    if previous_t<0
-        state = [x, y, 0, 0]';
+    if previous_t < 0
+        state = [x, y, 0, 0];
         % FIXME: stat with a very large uncertainty about the model
-        param.P = 10000 * eye(4);
-        % param.P = 0.1 * eye(4);
+        % param.P = 10000 * eye(4);
+        param.P = 0.1 * eye(4);
         predictx = x;
         predicty = y;
         return;
     end
 
-    sigmaPos2 = 0.1
-    sigmaVel2 = 0.1
+    sigmaPosX = 0.01;
+    sigmaPosY = 0.001;
+    sigmaVelX = 0.1;
+    sigmaVelY = 0.01;
 
-    sigmaMeasurement = diag ( [ sigmaPos2 , sigmaPos2 , sigmaVel2 , sigmaVel2 ] );
-    % sigma = diag ( [ σpx2 , σpy2 , σvx2 , σvy2 ] );
+    sigmaMeasurement = diag ( [ sigmaPosX , sigmaPosY , sigmaVelX , sigmaVelY ] );
 
-    dt = t - previous_t % FIXME: shall it be 330ms ?
+    dt = t - previous_t;
 
     % transition matrix
-    A = [ 1, 0, dt, 0; 0, 1, 0, dt; 0, 0, 1, 0; 0, 0, 0, 1 ]
-    % 4 by 4
+    A = [ 1, 0, dt, 0; 0, 1, 0, dt; 0, 0, 1, 0; 0, 0, 0, 1 ]; % 4 by 4
 
     % C observation matrix: z = C * x
-    C = [ 1, 0, 0, 0; 0, 1, 0, 0 ]
-    % 2 by 4
+    C = [ 1, 0, 0, 0; 0, 1, 0, 0 ]; % 2 by 4
 
-    sigmaObs2 = 0.1
+    sigmaObs2 = 0.001;
     sigmaObservation = diag ( [ sigmaObs2 , sigmaObs2 ] );
-    % sigmaObservation = diag ( [ σzx2 , σzy2 ] );
 
-    R = sigmaObservation % 2 by 2
-    P = A * param.P * A' + sigmaMeasurement % 4 by 4
-    K = P * C' * (inv(R + C * P * C'))
+    R = sigmaObservation; % 2 by 2
+    P = A * param.P * A' + sigmaMeasurement; % 4 by 4
+    K = P * C' * (inv(R + C * P * C'));
     % (4 by 4 * 4 by 2) * (2 by 2 + 2 by 4 * 4 by 4 * 4 by 2) => 4 by 2
 
-    state = A * state
-    % 4 by 4 * 4 by 1
+    z = [ x; y ]; % 2 by 1
 
-    sigmaP = P - K * C * P
-    % 4 by 4 - 4 by 2 * 2 by 4 * 4 by 4 => 4 by 4
+    newState = A * state' + K * ( z - C * A * state' );
+    % 4 by 4 * 4 by 1 + 4 by 2 * (2 by 1 - 2 by 4 * 4 by 1) => 4 by 1
 
-    z = [ x, y, 0, 0 ]
-    newX = A * state + K * ( z - C * A * state )
-    % 4 by 4 * 4 by 1 + 4 by 2 * (4 by 1 - 2 by 4 * 4 by 1) => 4 by 1
-
-    predictx = newX(1)
-    predicty = newX(2)
-    param.P = P
+    param.P = P;
+    state = newState';
+    predictx = state(1);
+    predicty = state(2);
 
 end
