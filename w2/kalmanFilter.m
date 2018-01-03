@@ -8,32 +8,52 @@ function [ predictx, predicty, state, param ] = kalmanFilter( t, x, y, state, pa
 
     % Check if the first time running this function
     if previous_t<0
-        state = [x, y, 0, 0];
-        param.P = 0.1 * eye(4);
+        state = [x, y, 0, 0]';
+        % FIXME: stat with a very large uncertainty about the model
+        param.P = 10000 * eye(4);
+        % param.P = 0.1 * eye(4);
         predictx = x;
         predicty = y;
         return;
     end
 
-    % dt = 330ms ?
-    % transition matrix A = [ 1, dt ; 0, 1 ]
-    A = [ 1, 0.033 ; 0 , 1 ];
+    sigmaPos2 = 0.1
+    sigmaVel2 = 0.1
 
+    sigmaMeasurement = diag ( [ sigmaPos2 , sigmaPos2 , sigmaVel2 , sigmaVel2 ] );
     % sigma = diag ( [ σpx2 , σpy2 , σvx2 , σvy2 ] );
 
+    dt = t - previous_t % FIXME: shall it be 330ms ?
+
+    % transition matrix
+    A = [ 1, 0, dt, 0; 0, 1, 0, dt; 0, 0, 1, 0; 0, 0, 0, 1 ]
+    % 4 by 4
+
     % C observation matrix: z = C * x
-    C = [ 1, 0, 0, 0 ; 0, 1, 0, 0 ];
+    C = [ 1, 0, 0, 0; 0, 1, 0, 0 ]
+    % 2 by 4
 
-    % sigmaMeasurement = diag ( [ σzx2 , σzy2 ] );
+    sigmaObs2 = 0.1
+    sigmaObservation = diag ( [ sigmaObs2 , sigmaObs2 ] );
+    % sigmaObservation = diag ( [ σzx2 , σzy2 ] );
 
-    %% TODO: Add Kalman filter updates
-    % As an example, here is a Naive estimate without a Kalman filter
-    % You should replace this code
-    vx = (x - state(1)) / (t - previous_t);
-    vy = (y - state(2)) / (t - previous_t);
-    % Predict 330ms into the future
-    predictx = x + vx * 0.330;
-    predicty = y + vy * 0.330;
-    % State is a four dimensional element
-    state = [x, y, vx, vy];
+    R = sigmaObservation % 2 by 2
+    P = A * param.P * A' + sigmaMeasurement % 4 by 4
+    K = P * C' * (inv(R + C * P * C'))
+    % (4 by 4 * 4 by 2) * (2 by 2 + 2 by 4 * 4 by 4 * 4 by 2) => 4 by 2
+
+    state = A * state
+    % 4 by 4 * 4 by 1
+
+    sigmaP = P - K * C * P
+    % 4 by 4 - 4 by 2 * 2 by 4 * 4 by 4 => 4 by 4
+
+    z = [ x, y, 0, 0 ]
+    newX = A * state + K * ( z - C * A * state )
+    % 4 by 4 * 4 by 1 + 4 by 2 * (4 by 1 - 2 by 4 * 4 by 1) => 4 by 1
+
+    predictx = newX(1)
+    predicty = newX(2)
+    param.P = P
+
 end

@@ -36,8 +36,6 @@ title('Ball Position tracks');
 xlabel('X (meters)');
 ylabel('Y (meters)');
 
-pause
-
 %% Run algorithm
 % Call your mapping function here.
 % Running time could take long depending on the efficiency of your code.
@@ -63,6 +61,8 @@ figure(1);
 hold on;
 plot(myPredictions(1, :), myPredictions(2, :), 'k+-');
 hold off;
+
+pause
 
 %% Show the error
 nSkip = 10;
