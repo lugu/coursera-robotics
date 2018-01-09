@@ -8,7 +8,7 @@
 clear all;
 close all;
 
-load practice.mat 
+load practice.mat;
 % This will load four variables: ranges, scanAngles, t, pose
 % [1] t is K-by-1 array containing time in second. (K=3701)
 %     You may not use time info for implementation.
@@ -27,11 +27,11 @@ param.resol = 25;
 param.size = [900, 900];
 
 % 3. Indicate where you will put the origin in pixels
-param.origin = [700,600]'; 
+param.origin = [700,600]';
 
 % 4. Log-odd parameters 
 param.lo_occ = 1;
-param.lo_free = 0.5; 
+param.lo_free = 0.5;
 param.lo_max = 100;
 param.lo_min = -100;
 

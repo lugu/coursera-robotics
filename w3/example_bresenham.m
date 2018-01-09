@@ -18,3 +18,5 @@ figure(1),
 imagesc(map); hold on;
 plot(orig(1),orig(2),'rx','LineWidth',3); % indicate start point
 axis equal;
+
+pause
