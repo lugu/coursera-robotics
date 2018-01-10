@@ -13,6 +13,13 @@ function myMap = occGridMapping(ranges, scanAngles, pose, param)
 %     e.g. pose(:,k) is the [x(meter),y(meter),theta(in radian)] at time index k.
 
 
+% Find grids hit by the rays (in the gird map coordinate)
+% Find occupied-measurement cells and free-measurement cells
+% Update the log-odds
+% Saturate the log-odd values
+% Visualize the map as needed
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 % Parameters
 %
@@ -30,12 +37,14 @@ lo_free = param.lo_free;
 lo_max = param.lo_max;
 lo_min = param.lo_min;
 
+lo_occ = param.lo_occ;
+lo_free = param.lo_free;
+lo_max = param.lo_max;
+lo_min = param.lo_min;
 
 N = size(pose,2);
 for j = 1:N % for each time,
-%
-%
-%     % Find grids hit by the rays (in the gird map coordinate)
+
       robotPosX = pose(1, j) * resol + origin(1);
       robotPosY = pose(2, j) * resol + origin(2);
       robotPosAngl = pose(3, j);
@@ -55,34 +64,15 @@ for j = 1:N % for each time,
 
           [freex, freey] = bresenham(orig(1),orig(2),occ(1),occ(2));
 
-          free = sub2ind(size(map),freey,freex);
+          free = sub2ind(size(map),freey(1:end-1),freex(1:end-1));
 
-          map(occ(2),occ(1)) = 3;
+          % set occ cell values
+          map(occ(2),occ(1)) = max(min(map(occ(2),occ(1)) + lo_occ, lo_min), lo_max);
           % set free cell values
-          map(free) = 1;
-
-          figure(1),
-          imagesc(map); hold on;
-          axis equal;
-          plot(orig(1),orig(2),'rx','LineWidth',3); % indicate start point
-          pause
+          map(free) = max(min(map(free) - lo_free, lo_min), lo_max);
 
       end
 
-%
-%
-%     % Find occupied-measurement cells and free-measurement cells
-%
-%
-%     % Update the log-odds
-%
-%
-%     % Saturate the log-odd values
-%
-%
-%     % Visualize the map as needed
-%
-%
 end
 
 myMap = map
