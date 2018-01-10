@@ -13,6 +13,13 @@ function myMap = occGridMapping(ranges, scanAngles, pose, param)
 %     e.g. pose(:,k) is the [x(meter),y(meter),theta(in radian)] at time index k.
 
 
+% map orientation:
+%       +-------> x
+%       |
+%       |
+%       V
+%       y
+
 % Find grids hit by the rays (in the gird map coordinate)
 % Find occupied-measurement cells and free-measurement cells
 % Update the log-odds
@@ -31,12 +38,7 @@ map = zeros(param.size);
 % % the origin of the map in pixels
 origin = param.origin;
 %
-% % 4. Log-odd parameters
-lo_occ = param.lo_occ;
-lo_free = param.lo_free;
-lo_max = param.lo_max;
-lo_min = param.lo_min;
-
+% 4. Log-odd parameters
 lo_occ = param.lo_occ;
 lo_free = param.lo_free;
 lo_max = param.lo_max;
@@ -67,9 +69,9 @@ for j = 1:N % for each time,
           free = sub2ind(size(map),freey(1:end-1),freex(1:end-1));
 
           % set occ cell values
-          map(occ(2),occ(1)) = max(min(map(occ(2),occ(1)) + lo_occ, lo_min), lo_max);
+          map(occ(2),occ(1)) = max(min(map(occ(2),occ(1)) + lo_occ, lo_max), lo_min);
           % set free cell values
-          map(free) = max(min(map(free) - lo_free, lo_min), lo_max);
+          map(free) = max(min(map(free) - lo_free, lo_max), lo_min);
 
       end
 
