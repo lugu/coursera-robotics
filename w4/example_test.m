@@ -32,7 +32,6 @@ param.init_pose = -init_pose;
 %% Plot LIDAR data
 lidar_local = [ranges(:,1).*cos(scanAngles) -ranges(:,1).*sin(scanAngles)];
 
-
 figure,
 plot(0,0,'rs'); hold on;
 plot(lidar_local(:,1),lidar_local(:,2),'.-'); 
@@ -48,8 +47,9 @@ title('Lidar measurement in the body frame');
 % Running time could take long depending on the efficiency of your code.
 % For a quicker test, you may take some hundreds frames as input arguments as
 % shown.
-%pose = particleLocalization(ranges(:,1:1000), scanAngles, M, param);
-load practice-answer.mat;
+pose = particleLocalization(ranges(:,1:1000), scanAngles, M, param);
+%FIXME: check the pose with the practice-answer result.
+%load practice-answer.mat;
 
 %% Plot final solution
 % The final grid map:
@@ -66,5 +66,7 @@ plot(lidar_global(:,1), lidar_global(:,2), 'g.');
 colormap('gray');
 axis equal;
 hold on;
+
 plot(pose(1,:)*param.resol+param.origin(1), ...
     pose(2,:)*param.resol+param.origin(2), 'r.-');
+pause
