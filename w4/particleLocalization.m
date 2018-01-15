@@ -26,32 +26,33 @@ pose(:,1) = param.init_pose;
 
 % Decide the number of particles, M.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-M = 100
+% FIXME: fine tune
+M = 100;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create M number of particles
-P = repmat(pose(:,1), [1, M]);
+P = [ repmat(pose(:,1), [1, M]); zeros(1, M) ];
+size(P)
 
-x_sigma = param.resol;
-y_sigma = param.resol;
-theta_sigma = pi;
+x_sigma = 1/param.resol;
+y_sigma = 1/param.resol;
+theta_sigma = pi/10;
 
-% for octave only:
-pkg load statistics
+[ max_map_y, max_map_x] = size(map)
 
 for j = 2:N 
 
-    for i = 1:size(P)
-        pose(:,j);
-        P(1, i) = mvnrnd(pose(1,j), x_sigma)
-        P(2, i) = mvnrnd(pose(2,j), y_sigma)
-        P(3, i) = mvnrnd(pose(3,j), theta_sigma)
-    end
+    j
+    P(4,:) = zeros(1, M);
 
-    for i = 1:size(P)
+    for i = 1:columns(P)
+
+        P(1, i) = mvnrnd(P(1,i), x_sigma);
+        P(2, i) = mvnrnd(P(1,i), y_sigma);
+        P(3, i) = mvnrnd(P(1,i), theta_sigma);
 
         robotPosX = P(1, j) * resol + origin(1);
         robotPosY = P(2, j) * resol + origin(2);
-        robotPosAngl = P(3, i)
+        robotPosAngl = P(3, i);
 
         for range = 1:1081 % for each time,
             tetha = robotPosAngl + scanAngles(range);
@@ -63,9 +64,24 @@ for j = 2:N
             orig = [ robotPosX; robotPosY ];
             occ = orig + rotationMatrix * localOcclusion;
             occ = floor(occ);
+            if min(occ) > 0
+                if occ(1) < max_map_x
+                    if occ(2) < max_map_y
+                        P(4, i) += map(occ(2),occ(1));
+                    end
+                end
+            end
+        end
 
-          end
+        % TODO: resample
+
      end
+
+     [m, index] = max(P(4,:));
+     pose(1, j) = P(1, index);
+     pose(2, j) = P(2, index);
+     pose(3, j) = P(3, index);
+
 
 % for j = 2:N % You will start estimating pose from j=2 using ranges(:,2).
 % 

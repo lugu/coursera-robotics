@@ -7,6 +7,9 @@
 clear all;
 close all;
 
+% for octave only:
+pkg load statistics
+
 load practice.mat
 % This will load four variables: ranges, scanAngles, t, pose
 % [1] t is K-by-1 array containing time in second. (K=3701)
@@ -32,24 +35,27 @@ param.init_pose = -init_pose;
 %% Plot LIDAR data
 lidar_local = [ranges(:,1).*cos(scanAngles) -ranges(:,1).*sin(scanAngles)];
 
-figure,
-plot(0,0,'rs'); hold on;
-plot(lidar_local(:,1),lidar_local(:,2),'.-'); 
-axis equal;
-set(gca,'YDir','reverse');
-xlabel('x');
-ylabel('y');
-grid on;
-title('Lidar measurement in the body frame');
+% figure,
+% plot(0,0,'rs'); hold on;
+% plot(lidar_local(:,1),lidar_local(:,2),'.-'); 
+% axis equal;
+% set(gca,'YDir','reverse');
+% xlabel('x');
+% ylabel('y');
+% grid on;
+% title('Lidar measurement in the body frame');
 
 %% Run algorithm
 % Call your mapping function here.
 % Running time could take long depending on the efficiency of your code.
 % For a quicker test, you may take some hundreds frames as input arguments as
 % shown.
-pose = particleLocalization(ranges(:,1:1000), scanAngles, M, param);
+
 %FIXME: check the pose with the practice-answer result.
-%load practice-answer.mat;
+load practice-answer.mat;
+
+% FIXME: take all the inputs
+pose = particleLocalization(ranges(:,1:10), scanAngles, M, param);
 
 %% Plot final solution
 % The final grid map:
