@@ -33,9 +33,11 @@ M = 100;
 P = [ repmat(pose(:,1), [1, M]); zeros(1, M) ];
 size(P)
 
-x_sigma = 1/resol;
-y_sigma = 1/resol;
-theta_sigma = pi/10;
+x_sigma = 2.6777e-04;
+y_sigma = 3.1766e-04;
+theta_sigma = 8.1771e-05;
+
+min_score = 800;
 
 [ max_map_y, max_map_x] = size(map)
 
@@ -47,8 +49,8 @@ for j = 1:N
     for i = 1:columns(P)
 
         P(1, i) = mvnrnd(P(1,i), x_sigma);
-        P(2, i) = mvnrnd(P(1,i), y_sigma);
-        P(3, i) = mvnrnd(P(1,i), theta_sigma);
+        P(2, i) = mvnrnd(P(2,i), y_sigma);
+        P(3, i) = mvnrnd(P(3,i), theta_sigma);
 
         robotPosX = P(1, i) * resol + origin(1);
         robotPosY = P(2, i) * resol + origin(2);
@@ -73,7 +75,6 @@ for j = 1:N
             end
         end
 
-        % TODO: resample
 
      end
 
@@ -82,6 +83,12 @@ for j = 1:N
      pose(2, j) = P(2, index);
      pose(3, j) = P(3, index);
 
+     score_filter = min(m, min_score);
+     idx = ( P(4,:) >= score_filter);
+     P = P(:,idx);
+     missing = M - columns(P)
+     idx = randi(columns(P), missing, 1);
+     P = [ P P(:,idx) ];
 
 % for j = 2:N % You will start estimating pose from j=2 using ranges(:,2).
 %
