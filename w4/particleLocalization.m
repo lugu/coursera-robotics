@@ -58,6 +58,9 @@ for j = 1:N
     robotPosAngl = P(3, :);
     % 1-by-M
 
+    occlusionsX = zeros(M, 1081);
+    occlusionsY = zeros(M, 1081);
+
     for range = 1:1081 % for each time,
         tetha = robotPosAngl + scanAngles(range);
         % 1-by-M
@@ -77,17 +80,31 @@ for j = 1:N
         % 2-by-M
         occM = floor(occM);
         % 2-by-M
-        for i = 1:columns(P)
-            occ = occM(:,i);
-            if min(occ) > 0
-                if occ(1) < max_map_x
-                    if occ(2) < max_map_y
-                        P(4, i) += map(occ(2),occ(1));
-                    end
-                end
-            end
-        end
 
+        occlusionsX(:,range) = occM(1,:);
+        occlusionsY(:,range) = occM(2,:);
+
+     end
+
+     for i = 1:columns(P)
+         occlusions = [ occlusionsX(i,:); occlusionsY(i,:) ];
+         % 2-by-1081
+         idx = ( occlusions(1,:) > 0);
+         occlusions = occlusions(:,idx);
+         idx = ( occlusions(1,:) < max_map_x);
+         occlusions = occlusions(:,idx);
+
+         idx = ( occlusions(2,:) > 0);
+         occlusions = occlusions(:,idx);
+         idx = ( occlusions(2,:) < max_map_y);
+         occlusions = occlusions(:,idx);
+         % 2-by-1081-or-less
+
+         % create the logical indexes
+
+         for k = 1:columns(occlusions)
+             P(4, i) += map(occlusions(2,k),occlusions(1,k));
+         end
 
      end
 
@@ -99,7 +116,7 @@ for j = 1:N
      score_filter = min(m, min_score);
      idx = ( P(4,:) >= score_filter);
      P = P(:,idx);
-     missing = M - columns(P)
+     missing = M - columns(P);
      idx = randi(columns(P), missing, 1);
      P = [ P P(:,idx) ];
   end
