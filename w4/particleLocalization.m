@@ -33,9 +33,10 @@ M = 100;
 P = [ repmat(pose(:,1), [1, M]); zeros(1, M) ];
 size(P)
 
-x_sigma = 2.6777e-04;
-y_sigma = 3.1766e-04;
-theta_sigma = 8.1771e-05;
+x_std =  0.016364
+y_std =  0.017823
+tetha_std =  0.0090428
+
 
 min_score = 800;
 
@@ -44,13 +45,13 @@ min_score = 800;
 for j = 1:N
 
     j
+
+    P(1,:) = P(1,:) + randn(1, M) * x_std;
+    P(2,:) = P(2,:) + randn(1, M) * y_std;
+    P(3,:) = P(3,:) + randn(1, M) * theta_std;
     P(4,:) = zeros(1, M);
 
     for i = 1:columns(P)
-
-        P(1, i) = mvnrnd(P(1,i), x_sigma);
-        P(2, i) = mvnrnd(P(2,i), y_sigma);
-        P(3, i) = mvnrnd(P(3,i), theta_sigma);
 
         robotPosX = P(1, i) * resol + origin(1);
         robotPosY = P(2, i) * resol + origin(2);

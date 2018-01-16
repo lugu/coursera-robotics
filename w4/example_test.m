@@ -55,9 +55,9 @@ load practice-answer.mat;
 
 % extract the covariance from the answer
 delta = pose(:,1:end-1) - pose(:,2:end);
-x_sigma = cov(delta(1,:))
-y_sigma = cov(delta(2,:))
-tetha_sigma = cov(delta(3,:))
+x_std = std(delta(1,:))
+y_std = std(delta(2,:))
+tetha_std = std(delta(3,:))
 
 % FIXME: take all the inputs
 pose = particleLocalization(ranges(:,1:10), scanAngles, M, param);
