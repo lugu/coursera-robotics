@@ -35,7 +35,7 @@ size(P)
 
 x_std =  0.016364
 y_std =  0.017823
-tetha_std =  0.0090428
+theta_std =  0.0090428
 
 
 min_score = 800;
@@ -51,22 +51,34 @@ for j = 1:N
     P(3,:) = P(3,:) + randn(1, M) * theta_std;
     P(4,:) = zeros(1, M);
 
-    for i = 1:columns(P)
+    robotPosX = P(1, :) * resol + origin(1);
+    % 1-by-M
+    robotPosY = P(2, :) * resol + origin(2);
+    % 1-by-M
+    robotPosAngl = P(3, :);
+    % 1-by-M
 
-        robotPosX = P(1, i) * resol + origin(1);
-        robotPosY = P(2, i) * resol + origin(2);
-        robotPosAngl = P(3, i);
-
-        for range = 1:1081 % for each time,
-            tetha = robotPosAngl + scanAngles(range);
-            rotationMatrix = [ cos(tetha), sin(tetha); -sin(tetha), cos(tetha) ];
-
-            localDistance = ranges(range, j) * resol;
-            localOcclusion = [ localDistance; 0 ];
-
-            orig = [ robotPosX; robotPosY ];
-            occ = orig + rotationMatrix * localOcclusion;
-            occ = floor(occ);
+    for range = 1:1081 % for each time,
+        tetha = robotPosAngl + scanAngles(range);
+        % 1-by-M
+        rotationMatrixTop = [ cos(tetha); sin(tetha) ];
+        % 2-by-M
+        rotationMatrixBottom = [ -sin(tetha); cos(tetha) ];
+        % 2-by-M
+        localDistance = ranges(range, j) * resol;
+        % 1-by-1
+        localOcclusion = [ localDistance; 0 ];
+        % 2-by-1
+        occX = rotationMatrixTop' * localOcclusion + robotPosX';
+        % M-by-1 = m-by-2 * 2-by-1 + M-by-1
+        occY = rotationMatrixBottom' * localOcclusion + robotPosY';
+        % M-by-1 = m-by-2 * 2-by-1 + M-by-1
+        occM = [ occX' ; occY' ];
+        % 2-by-M
+        occM = floor(occM);
+        % 2-by-M
+        for i = 1:columns(P)
+            occ = occM(:,i);
             if min(occ) > 0
                 if occ(1) < max_map_x
                     if occ(2) < max_map_y
@@ -90,27 +102,8 @@ for j = 1:N
      missing = M - columns(P)
      idx = randi(columns(P), missing, 1);
      P = [ P P(:,idx) ];
+  end
 
-% for j = 2:N % You will start estimating pose from j=2 using ranges(:,2).
-%
-%     % 1) Propagate the particles
-%
-%
-%     % 2) Measurement Update
-%     %   2-1) Find grid cells hit by the rays (in the grid map coordinate frame)
-%
-%     %   2-2) For each particle, calculate the correlation scores of the particles
-%
-%     %   2-3) Update the particle weights
-%
-%     %   2-4) Choose the best particle to update the pose
-%
-%     % 3) Resample if the effective number of particles is smaller than a threshold
-%
-%     % 4) Visualize the pose on the map as needed
-%
-%
-% end
 
 myPose = pose;
 end
