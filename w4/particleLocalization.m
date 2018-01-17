@@ -26,19 +26,17 @@ pose(:,1) = param.init_pose;
 
 % Decide the number of particles, M.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FIXME: fine tune
-M = 100;
+M = 200;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Create M number of particles
 P = [ repmat(pose(:,1), [1, M]); zeros(1, M) ];
 size(P)
 
-x_std =  0.016364
-y_std =  0.017823
-theta_std =  0.0090428
+x_std =  0.016364 * 2
+y_std =  0.017823 * 2
+theta_std =  0.0090428 * 2
 
-
-min_score = 800;
+min_score = 1200;
 
 [ max_map_y, max_map_x] = size(map)
 
@@ -83,10 +81,10 @@ for j = 1:N
 
         occlusionsX(:,range) = occM(1,:);
         occlusionsY(:,range) = occM(2,:);
-
      end
 
-     for i = 1:columns(P)
+     columnsP = size(P,2);
+     for i = 1:columnsP
          occlusions = [ occlusionsX(i,:); occlusionsY(i,:) ];
          % 2-by-1081
          idx = ( occlusions(1,:) > 0);
@@ -107,7 +105,8 @@ for j = 1:N
 
      end
 
-     [m, index] = max(P(4,:))
+     [m, index] = max(P(4,:));
+     m
      pose(1, j) = P(1, index);
      pose(2, j) = P(2, index);
      pose(3, j) = P(3, index);
@@ -115,8 +114,9 @@ for j = 1:N
      score_filter = min(m, min_score);
      idx = ( P(4,:) >= score_filter);
      P = P(:,idx);
-     missing = M - columns(P);
-     idx = randi(columns(P), missing, 1);
+     columnsP = size(P,2);
+     missing = M - columnsP;
+     idx = randi(columnsP, missing, 1);
      P = [ P P(:,idx) ];
   end
 

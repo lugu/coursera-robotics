@@ -60,7 +60,7 @@ y_std = std(delta(2,:))
 tetha_std = std(delta(3,:))
 
 % FIXME: take all the inputs
-pose = particleLocalization(ranges(:,1:100), scanAngles, M, param);
+pose = particleLocalization(ranges(:,1:500), scanAngles, M, param);
 
 %% Plot final solution
 % The final grid map:
