@@ -101,10 +101,9 @@ for j = 1:N
          % 2-by-1081-or-less
 
          % create the logical indexes
-
-         for k = 1:columns(occlusions)
-             P(4, i) += map(occlusions(2,k),occlusions(1,k));
-         end
+         T = [max_map_y 1];
+         idx = T * (occlusions - [0; 1]);
+         P(4, i) = sum(map(idx));
 
      end
 
